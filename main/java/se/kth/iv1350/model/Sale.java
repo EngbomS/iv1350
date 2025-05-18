@@ -1,5 +1,7 @@
 package se.kth.iv1350.model;
 
+import se.kth.iv1350.dto.ReceiptDTO;
+
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -75,7 +77,6 @@ public class Sale {
         return Collections.unmodifiableCollection(items.values());
     }
 
-
     /**
      * Calculates the total VAT for all items in the sale.
      * @return The total VAT, rounded to two decimal places.
@@ -91,6 +92,7 @@ public class Sale {
         }
         return Math.round(totalVAT * 100.0) / 100.0;
     }
+
     /**
      * Summary information.
      * @return summary of totals and vat
@@ -98,5 +100,14 @@ public class Sale {
     public SaleSummary getSummary() {
         return new SaleSummary(getTotalPriceIncVAT(), getTotalVAT());
     }
-    
+
+    /**
+     * Generates and returns the receipt DTO for this sale.
+     * @param payment The payment details.
+     * @return A ReceiptDTO representing the sale.
+     */
+    public ReceiptDTO createReceiptDTO(Payment payment) {
+        Receipt receipt = new Receipt(this, payment);
+        return receipt.getReceiptDTO();
+    }
 }

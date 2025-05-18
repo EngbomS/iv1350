@@ -1,11 +1,11 @@
 package se.kth.iv1350.integration;
 
-import se.kth.iv1350.model.Receipt;
 import se.kth.iv1350.model.Sale;
+import se.kth.iv1350.dto.ReceiptDTO;
 
 /**
  * Handles interaction with external systems such as the inventory system,
- * accounting system, and printer. here we groups these responsibilities into a single
+ * accounting system, and printer. Groups these responsibilities into a single
  * cohesive unit to reduce coupling in the controller.
  */
 public class ExternalSystemHandler {
@@ -27,10 +27,10 @@ public class ExternalSystemHandler {
 
     /**
      * Prints the given receipt using the configured printer.
-     * @param receipt The receipt to print.
+     * @param receiptDTO The receipt to print.
      */
-    public void print(Receipt receipt) {
-        printer.print(receipt);
+    public void print(ReceiptDTO receiptDTO) {
+        printer.printReceipt(receiptDTO);
     }
 
     /**

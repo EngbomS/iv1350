@@ -1,55 +1,59 @@
 package se.kth.iv1350.model;
 
-import java.time.format.DateTimeFormatter;
-import java.util.Map;
+import se.kth.iv1350.dto.ReceiptDTO;
+import se.kth.iv1350.dto.ReceiptDTO.SoldItem;
+
+import java.util.List;
+import java.util.ArrayList;
 
 /**
  * Represents a receipt generated at the end of a sale.
- * Contains formatted text detailing the transaction.
+ * Contains the full transaction data as a DTO.
  */
 public class Receipt {
-    private String receiptText;
+    private final ReceiptDTO receiptDTO;
 
     /**
-     * Creats a new receipt for the completed sale and payment.
+     * Creates a new receipt for the completed sale and payment.
      * @param sale The completed sale.
      * @param payment The payment made by the customer.
      */
     public Receipt(Sale sale, Payment payment) {
-        this.receiptText = generateReceiptText(sale, payment);
+        this.receiptDTO = createDTO(sale, payment);
     }
 
     /**
-     * Returns the formatted receipt as a string.
-     * @return The receipt text.
+     * Returns a data transfer object containing receipt information.
+     * @return The receipt data.
      */
-    public String getReceiptText() {
-        return receiptText;
+    public ReceiptDTO getReceiptDTO() {
+        return receiptDTO;
     }
 
-    
-    private String generateReceiptText(Sale sale, Payment payment) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("------------------ Begin receipt -------------------\n");
-        sb.append("Time of Sale: ")
-          .append(sale.getTimeOfSale().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
-          .append("\n\n");
-
-          for (Item item : sale.getItems()) {
-            sb.append(item.getName()).append(" ")
-            .append(item.getQuantity()).append(" x ")
-            .append(String.format("%.2f", item.getPrice())).append(" ")
-            .append(String.format("%.2f", item.getTotalPriceIncVAT())).append(" SEK\n");
-
+    private ReceiptDTO createDTO(Sale sale, Payment payment) {
+        List<SoldItem> itemList = new ArrayList<>();
+        for (Item item : sale.getItems()) {
+            itemList.add(new SoldItem(
+                item.getName(),        
+                item.getQuantity(),
+                item.getPrice(),
+                item.getVAT() / 100.0  
+            ));
         }
-        
 
-        sb.append("\nTotal: ").append(String.format("%.2f", sale.getTotalPriceIncVAT())).append(" SEK\n");
-        sb.append("VAT: ").append(String.format("%.2f", sale.getTotalVAT())).append("\n");
-        sb.append("Cash: ").append(String.format("%.2f", payment.getAmountPaid())).append(" SEK\n");
-        sb.append("Change: ").append(String.format("%.2f", payment.getAmountPaid() - sale.getTotalPriceIncVAT())).append(" SEK\n");
-        sb.append("------------------ End receipt ---------------------\n");
+        double totalPrice = sale.getTotalPriceIncVAT();
+        double totalVAT = sale.getTotalVAT();
+        double amountPaid = payment.getAmountPaid();
+        double change = amountPaid - totalPrice;
 
-        return sb.toString();
+        return new ReceiptDTO(
+            sale.getTimeOfSale(),
+            itemList,
+            totalPrice,
+            totalVAT,
+            amountPaid,
+            change
+        );
     }
 }
+

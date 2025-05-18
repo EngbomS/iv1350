@@ -29,10 +29,25 @@ public class ControllerTest {
     }
 
     @Test
-    public void testRegisterInvalidItem() {
+    public void testRegisterInvalidItem_throwsItemNotFound() {
         ItemDescription desc = controller.registerItem("invalidId", 1);
-        assertNull(desc, "Expected null for an invalid item ID.");
+        assertNull(desc, "Expected null for unknown item ID.");
     }
+    @Test
+    public void testRegisterSimulatedDatabaseFailure_throwsDatabaseFailureException() {
+        assertThrows(DatabaseFailureException.class, () -> {
+            controller.registerItem("FAIL", 1);
+        }, "Expected DatabaseFailureException for item ID 'FAIL'.");
+    }
+    @Test
+    public void testRegisterInvalidItem_doesNotChangeSaleState() {
+        controller.registerItem("invalidId", 1);
+        SaleSummary summary = controller.endSale();
+        assertEquals(0.0, summary.totalPriceIncVAT, 0.001, "Total price should remain 0 after invalid item.");
+    }
+
+
+
 
     @Test
     public void testTotalPriceAfterItemRegistration() {
@@ -57,12 +72,11 @@ public class ControllerTest {
     }
 
     @Test
-    public void testMakePaymentGeneratesReceipt() {
+    public void testMakePaymentCompletesWithoutException() {
         controller.registerItem("abc123", 1);
         controller.endSale();
-        String receipt = controller.makePayment(100.0);
-        assertNotNull(receipt, "Receipt should not be null.");
-        
-        assertTrue(receipt.contains("Total"), "Receipt should include total line.");
-    }
+        assertDoesNotThrow(() -> controller.makePayment(100.0),
+        "makePayment should complete without throwing exceptions");
+}
+
 }

@@ -4,15 +4,21 @@ import se.kth.iv1350.model.ItemDescription;
 
 /**
  * Represents a registry of items. In a real application this would interact with
- * a db right now it uses hardcoded item data.
+ * a database. Right now it uses hardcoded item data.
  */
 public class ItemRegistry {
     /**
      * Searches for an item by its item ID.
      * @param itemId The ID of the item to search for.
-     * @return The itemDescription if the item is found otherwise null.
+     * @return The item description if found.
+     * @throws ItemNotFoundException If the item does not exist.
+     * @throws DatabaseFailureException If the simulated database is "down".
      */
-    public ItemDescription findItemById(String itemId) {
+    public ItemDescription findItemById(String itemId) throws ItemNotFoundException {
+        if (itemId.equals("FAIL")) {
+            throw new DatabaseFailureException(itemId);
+        }
+
         if (itemId.equals("abc123")) {
             return new ItemDescription(
                 "abc123",
@@ -30,7 +36,7 @@ public class ItemRegistry {
                 6
             );
         } else {
-            return null;
+            throw new ItemNotFoundException(itemId);
         }
     }
 }
