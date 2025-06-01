@@ -4,11 +4,15 @@ import se.kth.iv1350.dto.ReceiptDTO;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import se.kth.iv1350.util.RevenueObserver;
+
+
 
 /**
  * Represents a sale, containing items and metadata such as the time of sale.
  */
 public class Sale {
+    private final List<RevenueObserver> revenueObservers = new ArrayList<>();
     private Map<String, Item> items = new HashMap<>();
     private LocalDateTime timeOfSale;
 
@@ -100,6 +104,16 @@ public class Sale {
     public SaleSummary getSummary() {
         return new SaleSummary(getTotalPriceIncVAT(), getTotalVAT());
     }
+    public void addRevenueObserver(RevenueObserver observer) {
+    revenueObservers.add(observer);
+}
+
+    private void notifyObservers(double paidAmount) {
+    for (RevenueObserver observer : revenueObservers) {
+        observer.newPayment(paidAmount);
+    }
+}
+
 
     /**
      * Generates and returns the receipt DTO for this sale.
@@ -108,6 +122,9 @@ public class Sale {
      */
     public ReceiptDTO createReceiptDTO(Payment payment) {
         Receipt receipt = new Receipt(this, payment);
-        return receipt.getReceiptDTO();
-    }
+        ReceiptDTO dto = receipt.getReceiptDTO();
+        notifyObservers(dto.totalPrice);
+    return dto;
+}
+
 }

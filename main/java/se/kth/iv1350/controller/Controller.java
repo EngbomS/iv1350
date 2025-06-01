@@ -39,6 +39,9 @@ public class Controller {
      */
     public void startSale() {
         currentSale = new Sale();
+        for (RevenueObserver observer : revenueObservers) {
+        currentSale.addRevenueObserver(observer);
+    }
         currentSale.setTimeOfSale();
     }
 
@@ -48,23 +51,20 @@ public class Controller {
      * @param itemId The ID of the item to register.
      * @param quantity The number of items.
      * @return The item description if found, otherwise null.
+     * 
+     * @throws DatabaseFailureException if a database error occurs while searching for the item.
      */
-    public ItemDescription registerItem(String itemId, int quantity) throws DatabaseFailureException {
-    try {
-        ItemDescription desc = itemRegistry.findItemById(itemId);
+   public ItemDescription registerItem(String itemId, int quantity) throws DatabaseFailureException, ItemNotFoundException {
+    ItemDescription desc = itemRegistry.findItemById(itemId);
 
-        if (currentSale.hasItem(itemId)) {
-            currentSale.increaseQuantity(itemId, quantity);
-        } else {
-            currentSale.addItem(desc, quantity);
-        }
-        return desc;
-
-    } catch (ItemNotFoundException e) {
-        
-        return null;
+    if (currentSale.hasItem(itemId)) {
+        currentSale.increaseQuantity(itemId, quantity);
+    } else {
+        currentSale.addItem(desc, quantity);
     }
+    return desc;
 }
+
     /**
     * Adds a revenue observer that will be notified after each payment.
     * @param observer The observer to register.
@@ -72,11 +72,7 @@ public class Controller {
     public void addRevenueObserver(RevenueObserver observer) {
         revenueObservers.add(observer);
     }
-    private void notifyObservers(double paidAmount) {
-        for (RevenueObserver observer : revenueObservers) {
-            observer.newPayment(paidAmount);
-    }
-}
+    
 
 
 
@@ -99,8 +95,7 @@ public class Controller {
         systemHandler.print(receiptDTO);
         systemHandler.registerSale(currentSale);
         systemHandler.updateInventory(currentSale);
-        double revenue = receiptDTO.totalPrice;
-        notifyObservers(revenue);
+        
     }
 
     /**

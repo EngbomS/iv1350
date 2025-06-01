@@ -3,6 +3,7 @@ package se.kth.iv1350.view;
 import se.kth.iv1350.util.FileLogger;
 import se.kth.iv1350.controller.Controller;
 import se.kth.iv1350.integration.DatabaseFailureException;
+import se.kth.iv1350.integration.ItemNotFoundException;
 import se.kth.iv1350.model.ItemDescription;
 import se.kth.iv1350.model.SaleSummary;
 import se.kth.iv1350.util.TotalRevenueView;
@@ -34,7 +35,7 @@ public class View {
     private void simulateSale() {
         controller.startSale();
 
-        
+        registerAndPrint("FAIL", 1);
         registerAndPrint("abc123", 1);
         registerAndPrint("abc123", 1);
         registerAndPrint("def456", 1);
@@ -63,23 +64,24 @@ public class View {
     System.out.println("\nAdd " + quantity + " item(s) with item ID " + itemId + ":");
     try {
         ItemDescription desc = controller.registerItem(itemId, quantity);
-        if (desc != null) {
-            System.out.println("Item ID: " + desc.getItemID());
-            System.out.println("Item name: " + desc.getName());
-            System.out.println("Item cost: " + desc.getPrice() + " SEK");
-            System.out.println("VAT: " + desc.getVAT() + "%");
-            System.out.println("Item description: " + desc.getDescription());
 
-            SaleSummary summary = controller.endSale();
-            System.out.println("Total cost (incl VAT): " + String.format("%.2f", summary.totalPriceIncVAT) + " SEK");
-            System.out.println("Total VAT: " + String.format("%.2f", summary.totalVAT) + " SEK");
-        } else {
-            System.out.println("Invalid item ID: " + itemId);
-        }
+        System.out.println("Item ID: " + desc.getItemID());
+        System.out.println("Item name: " + desc.getName());
+        System.out.println("Item cost: " + desc.getPrice() + " SEK");
+        System.out.println("VAT: " + desc.getVAT() + "%");
+        System.out.println("Item description: " + desc.getDescription());
+
+        SaleSummary summary = controller.endSale();
+        System.out.println("Total cost (incl VAT): " + String.format("%.2f", summary.totalPriceIncVAT) + " SEK");
+        System.out.println("Total VAT: " + String.format("%.2f", summary.totalVAT) + " SEK");
+
+    } catch (ItemNotFoundException e) {
+        System.out.println("Invalid item ID: " + itemId);
     } catch (DatabaseFailureException e) {
         System.out.println("ERROR: Could not contact item database. Please try again later.");
         logger.logException(e);
-}
+    }
+
 
 }
 
