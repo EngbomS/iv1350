@@ -51,7 +51,7 @@ public class Controller {
      * @param itemId The ID of the item to register.
      * @param quantity The number of items.
      * @return The item description if found, otherwise null.
-     * 
+     * @throws ItemNotFoundException if the item ID does not exist in the item registry.
      * @throws DatabaseFailureException if a database error occurs while searching for the item.
      */
    public ItemDescription registerItem(String itemId, int quantity) throws DatabaseFailureException, ItemNotFoundException {
